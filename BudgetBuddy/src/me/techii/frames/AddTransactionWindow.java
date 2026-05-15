@@ -6,6 +6,9 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import me.techii.services.base.Database;
+
 import javax.swing.JTextField;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -16,6 +19,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.awt.event.ActionEvent;
 
 public class AddTransactionWindow extends JFrame {
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -25,8 +32,8 @@ public class AddTransactionWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField textField;
-	private JTextField textField_1;
+	private JTextField amountField;
+	private JTextField descriptionField;
 
 	/**
 	 * Launch the application.
@@ -36,6 +43,7 @@ public class AddTransactionWindow extends JFrame {
 			public void run() {
 				try {
 					AddTransactionWindow frame = new AddTransactionWindow();
+					frame.setTitle("Add Transaction");
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -46,10 +54,15 @@ public class AddTransactionWindow extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
 	 */
-	public AddTransactionWindow() {
+	public AddTransactionWindow() throws ClassNotFoundException, SQLException {
+		Database db = new Database();
+		Connection conn = db.getConn();
+		
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds((screenSize.width / 2) - (windowWidth / 2), (screenSize.height / 2) - (windowHeight / 2), windowWidth, windowHeight);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -83,27 +96,37 @@ public class AddTransactionWindow extends JFrame {
 		lblAmount.setBounds(10, 123, 102, 22);
 		contentPane.add(lblAmount);
 		
-		textField = new JTextField();
-		textField.setBounds(122, 119, 242, 34);
-		contentPane.add(textField);
-		textField.setColumns(10);
+		amountField = new JTextField();
+		amountField.setBounds(122, 119, 242, 34);
+		contentPane.add(amountField);
+		amountField.setColumns(10);
 		
 		JLabel lblDescription = new JLabel("Description:");
 		lblDescription.setFont(new Font("Tahoma", Font.BOLD, 16));
 		lblDescription.setBounds(10, 176, 102, 22);
 		contentPane.add(lblDescription);
 		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(122, 172, 242, 99);
-		contentPane.add(textField_1);
+		descriptionField = new JTextField();
+		descriptionField.setColumns(10);
+		descriptionField.setBounds(122, 172, 242, 99);
+		contentPane.add(descriptionField);
 		
 		JButton btnNewButton = new JButton("Save");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
 		btnNewButton.setBackground(Color.GREEN);
 		btnNewButton.setBounds(122, 282, 117, 34);
 		contentPane.add(btnNewButton);
 		
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		btnCancel.setBackground(Color.RED);
 		btnCancel.setBounds(247, 282, 117, 34);
 		contentPane.add(btnCancel);
