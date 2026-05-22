@@ -24,8 +24,6 @@ import java.time.LocalDate;
 public class AddTransactionWindow extends JFrame {
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-	private MainWindow parent;
-
 	private int windowWidth = 450;
 	private int windowHeight = 366;
 
@@ -34,11 +32,7 @@ public class AddTransactionWindow extends JFrame {
 	private JTextField amountField;
 	private JTextField descriptionField;
 
-	private MainWindow parentWindow;
-
 	public AddTransactionWindow(MainWindow mainWindow) throws ClassNotFoundException, SQLException {
-
-		this.parentWindow = parent;
 
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -95,33 +89,30 @@ public class AddTransactionWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					double amount = Double.parseDouble(amountField.getText());
-					String type = comboBox.getSelectedItem().toString().toLowerCase();
 					String desc = descriptionField.getText();
 
-					// Iegūstam kārtas numuru no saraksta: Income=1, Food=2, Transport=3...
 					int categoryId = comboBox_1.getSelectedIndex() + 1;
-					int userId = 1;
+					int userId = mainWindow.userId;
+					
+					System.out.println(userId);
 
 					Database db = new Database();
 					Connection conn = db.getConn();
 
-					// Klasisks, vienkāršs datu ierakstīšanas vaicājums
-					String sql = "INSERT INTO Transactions (amount, date, description, type, user_id, category_id) VALUES (?, ?, ?, ?, ?, ?)";
+					String sql = "INSERT INTO Transactions (amount, date, description, user_id, category_id) VALUES (?, ?, ?, ?, ?)";
 					PreparedStatement stmt = conn.prepareStatement(sql);
 					stmt.setDouble(1, amount);
 					stmt.setDate(2, java.sql.Date.valueOf(LocalDate.now()));
 					stmt.setString(3, desc);
-					stmt.setString(4, type);
-					stmt.setInt(5, userId);
-					stmt.setInt(6, categoryId);
+					stmt.setInt(4, userId);
+					stmt.setInt(5, categoryId);
 
 					stmt.executeUpdate();
 
 					stmt.close();
 					conn.close();
 
-					// Liekam galvenajam logam pārlasīt datus no jauna
-					parentWindow.refreshData();
+					mainWindow.refreshData();
 					dispose();
 
 				} catch (NumberFormatException ex) {
