@@ -93,8 +93,6 @@ public class AddTransactionWindow extends JFrame {
 
 					int categoryId = comboBox_1.getSelectedIndex() + 1;
 					int userId = mainWindow.userId;
-					
-					System.out.println(userId);
 
 					Database db = new Database();
 					Connection conn = db.getConn();
