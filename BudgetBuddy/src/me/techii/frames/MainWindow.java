@@ -50,9 +50,7 @@ public class MainWindow extends JFrame {
 	private JLabel Budget_Spent_Label;
 	private JPanel BudgetMeterGreenThingy;
 	private JLabel Budget_Percent_Label;
-	
-	private double balance;
-	
+
 	public static int userId;
 
 	public static void main(String[] args) {
@@ -72,9 +70,9 @@ public class MainWindow extends JFrame {
 	public MainWindow(int userID) throws ClassNotFoundException, SQLException {
 //		Database db = new Database();
 //		Connection conn = db.getConn();
-		
+
 		this.userId = userID;
-		
+
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds((screenSize.width / 2) - (windowWidth / 2), (screenSize.height / 2) - (windowHeight / 2), windowWidth,
@@ -213,6 +211,7 @@ public class MainWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					AddTransactionWindow transactionWindow = new AddTransactionWindow(MainWindow.this);
+					transactionWindow.setTitle("Add transaction form - BudgetBuddy");
 					transactionWindow.setVisible(true);
 				} catch (Exception e1) {
 					e1.printStackTrace();
@@ -269,10 +268,10 @@ public class MainWindow extends JFrame {
 		Total_Expenses_Label.setBounds(106, 53, 76, 14);
 		panel_2.add(Total_Expenses_Label);
 
-		JPanel panel_3 = new JPanel();
-		panel_3.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_3.setBounds(10, 88, 172, 1);
-		panel_2.add(panel_3);
+		JPanel Line = new JPanel();
+		Line.setBorder(new LineBorder(new Color(0, 0, 0)));
+		Line.setBounds(10, 88, 172, 1);
+		panel_2.add(Line);
 
 		JLabel lblNewLabel_1_2_1_1 = new JLabel("Balance");
 		lblNewLabel_1_2_1_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -296,10 +295,10 @@ public class MainWindow extends JFrame {
 		lblNewLabel_1_2_1_1_1.setBounds(10, 11, 61, 17);
 		panel_2_1.add(lblNewLabel_1_2_1_1_1);
 
-//        JLabel lblNewLabel_1_2_1_2 = new JLabel("(Viss)");
-//        lblNewLabel_1_2_1_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
-//        lblNewLabel_1_2_1_2.setBounds(70, 12, 88, 14);
-//        panel_2_1.add(lblNewLabel_1_2_1_2);
+		JLabel lblNewLabel_1_2_1_2 = new JLabel("(This month)");
+		lblNewLabel_1_2_1_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblNewLabel_1_2_1_2.setBounds(70, 12, 88, 14);
+		panel_2_1.add(lblNewLabel_1_2_1_2);
 
 		JLabel lblNewLabel_1_2_1_2_1 = new JLabel("Limit:");
 		lblNewLabel_1_2_1_2_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -342,7 +341,8 @@ public class MainWindow extends JFrame {
 		btnViewStatistics.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					ViewStatisticsWindow statsWindow = new ViewStatisticsWindow();
+					ViewStatisticsWindow statsWindow = new ViewStatisticsWindow(userID);
+					statsWindow.setTitle("Statistics Window - BudgetBuddy");
 					statsWindow.setVisible(true);
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -353,6 +353,20 @@ public class MainWindow extends JFrame {
 		btnViewStatistics.setBackground(new Color(85, 170, 255));
 		btnViewStatistics.setBounds(10, 357, 192, 41);
 		panel_1.add(btnViewStatistics);
+
+		JButton btnLogout = new JButton("Logout");
+		btnLogout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				userId = 0;
+				dispose();
+				LoginRegistrationWindow LRWindow = new LoginRegistrationWindow();
+				LRWindow.setTitle("Login/Registration Form - BudgetBuddy");
+				LRWindow.setVisible(true);
+			}
+		});
+		btnLogout.setBackground(new Color(85, 170, 255));
+		btnLogout.setBounds(125, 11, 77, 23);
+		panel_1.add(btnLogout);
 
 		refreshData();
 	}
@@ -433,9 +447,7 @@ public class MainWindow extends JFrame {
 			transactionsContainer.add(row);
 		}
 
-		rs.close();
-		stmt.close();
-		conn.close();
+		double newBalance = totalIncome - totalExpenses;
 
 		Income_Label.setText("€ " + totalIncome);
 		Food_label.setText("€ " + food);
@@ -446,7 +458,16 @@ public class MainWindow extends JFrame {
 
 		Total_Income_Label.setText("€ " + totalIncome);
 		Total_Expenses_Label.setText("€ " + totalExpenses);
-		Balance_Label.setText("€ " + (totalIncome - totalExpenses));
+		Balance_Label.setText("€ " + newBalance);
+
+		String balSQL = "UPDATE Users SET balance = ? WHERE user_id = " + userId;
+		PreparedStatement balSTMT = conn.prepareStatement(balSQL);
+		balSTMT.setDouble(1, newBalance);
+		balSTMT.executeUpdate();
+
+		rs.close();
+		stmt.close();
+		conn.close();
 
 		double budgetLimit = 500.0;
 		Budget_Spent_Label.setText("€ " + totalExpenses);

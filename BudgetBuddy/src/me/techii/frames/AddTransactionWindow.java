@@ -36,7 +36,8 @@ public class AddTransactionWindow extends JFrame {
 
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds((screenSize.width / 2) - (windowWidth / 2), (screenSize.height / 2) - (windowHeight / 2), windowWidth, windowHeight);
+		setBounds((screenSize.width / 2) - (windowWidth / 2), (screenSize.height / 2) - (windowHeight / 2), windowWidth,
+				windowHeight);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -44,7 +45,7 @@ public class AddTransactionWindow extends JFrame {
 
 		JComboBox comboBox = new JComboBox();
 		comboBox.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Income", "Expense"}));
+		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Income", "Expense" }));
 		comboBox.setBounds(122, 12, 302, 34);
 		contentPane.add(comboBox);
 
@@ -58,8 +59,9 @@ public class AddTransactionWindow extends JFrame {
 		lblCategory.setBounds(10, 69, 102, 22);
 		contentPane.add(lblCategory);
 
-		JComboBox comboBox_1 = new JComboBox();
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"Income", "Food", "Transport", "Entertainment", "Utilities", "Other"}));
+		JComboBox<?> comboBox_1 = new JComboBox();
+		comboBox_1.setModel(new DefaultComboBoxModel(
+				new String[] { "Income", "Food", "Transport", "Entertainment", "Utilities", "Other" }));
 		comboBox_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		comboBox_1.setBounds(122, 63, 302, 34);
 		contentPane.add(comboBox_1);
@@ -88,33 +90,54 @@ public class AddTransactionWindow extends JFrame {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
+					int errorCount = 0;
+					String validCharacters = "1234567890.";
+					
 					double amount = Double.parseDouble(amountField.getText());
+					String amountText = String.valueOf(amount);
+					
 					String desc = descriptionField.getText();
 
 					int categoryId = comboBox_1.getSelectedIndex() + 1;
 					int userId = mainWindow.userId;
-
-					Database db = new Database();
-					Connection conn = db.getConn();
-
-					String sql = "INSERT INTO Transactions (amount, date, description, user_id, category_id) VALUES (?, ?, ?, ?, ?)";
-					PreparedStatement stmt = conn.prepareStatement(sql);
-					stmt.setDouble(1, amount);
-					stmt.setDate(2, java.sql.Date.valueOf(LocalDate.now()));
-					stmt.setString(3, desc);
-					stmt.setInt(4, userId);
-					stmt.setInt(5, categoryId);
-
-					stmt.executeUpdate();
-
-					stmt.close();
-					conn.close();
-
-					mainWindow.refreshData();
-					dispose();
-
+					
+					for (int i = 0; i < amountText.length(); i++) {
+						for (int j = 0; j < validCharacters.length(); j++) {
+							if (amountText.charAt(i) != validCharacters.charAt(j)) {
+								errorCount++;
+							} else {
+								errorCount = 0;
+								j = validCharacters.length() + 1;
+								
+							}
+						}
+						if (errorCount > 1) {
+							return;
+						}
+					}
+					
+					if (errorCount == 0) {
+						Database db = new Database();
+						Connection conn = db.getConn();
+	
+						String sql = "INSERT INTO Transactions (amount, date, description, user_id, category_id) VALUES (?, ?, ?, ?, ?)";
+						PreparedStatement stmt = conn.prepareStatement(sql);
+						stmt.setDouble(1, amount);
+						stmt.setDate(2, java.sql.Date.valueOf(LocalDate.now()));
+						stmt.setString(3, desc);
+						stmt.setInt(4, userId);
+						stmt.setInt(5, categoryId);
+	
+						stmt.executeUpdate();
+	
+						stmt.close();
+						conn.close();
+	
+						mainWindow.refreshData();
+						dispose();
+					}
 				} catch (NumberFormatException ex) {
-					System.out.println("Kļūda: Ievadi skaitli!");
+					ex.printStackTrace();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
