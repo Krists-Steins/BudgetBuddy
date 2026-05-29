@@ -1,6 +1,6 @@
 package me.techii;
 
-import me.techii.frames.LoginRegistrationWindow;
+import me.techii.GUI.LoginRegistrationWindow;
 
 public class Main {
 	public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package me.techii.frames;
+package me.techii.GUI;
 
 import java.awt.EventQueue;
 
