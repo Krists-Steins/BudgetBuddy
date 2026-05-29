@@ -10,7 +10,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridLayout;
 
 import javax.swing.JLabel;
 import java.awt.event.ActionListener;
@@ -173,13 +172,10 @@ public class ViewStatisticsWindow extends JFrame {
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = stmt.executeQuery();
 
-		double totalIncome = 0;
 		double totalExpenses = 0;
 		double food = 0, transport = 0, entertainment = 0, utilities = 0, other = 0;
 
 		while (rs.next()) {
-			String date = rs.getDate("date").toString();
-			String desc = rs.getString("description");
 			String type = "";
 			double amount = rs.getDouble("amount");
 			int categoryId = rs.getInt("category_id");
@@ -195,13 +191,7 @@ public class ViewStatisticsWindow extends JFrame {
 				i++;
 			}
 
-			String categoryName = "Income";
-			if (categoryId >= 1) {
-				categoryName = kategorijuMasivs[categoryId];
-			}
-
 			if (type.equalsIgnoreCase("income")) {
-				totalIncome += amount;
 			} else {
 				totalExpenses += amount;
 

@@ -68,9 +68,6 @@ public class MainWindow extends JFrame {
 	}
 
 	public MainWindow(int userID) throws ClassNotFoundException, SQLException {
-//		Database db = new Database();
-//		Connection conn = db.getConn();
-
 		this.userId = userID;
 
 		setResizable(false);

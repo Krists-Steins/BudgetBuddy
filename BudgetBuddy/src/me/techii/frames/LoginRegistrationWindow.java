@@ -166,8 +166,6 @@ public class LoginRegistrationWindow extends JFrame {
 								.encodeToString(new String(loginPasswordField.getPassword()).getBytes());
 
 						boolean loggedIn = false;
-						String passwordS = new String(loginPasswordField.getPassword());
-
 						Database db = new Database();
 						Connection conn = db.getConn();
 
