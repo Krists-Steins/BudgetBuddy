@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import me.techii.services.StatisticsService;
 import me.techii.services.base.Database;
 
 public class ViewStatisticsWindow extends JFrame {
@@ -69,6 +70,8 @@ public class ViewStatisticsWindow extends JFrame {
 	 * @throws ClassNotFoundException
 	 */
 	public ViewStatisticsWindow(int userID) throws ClassNotFoundException, SQLException {
+		StatisticsService sService = new StatisticsService();
+		
 		setResizable(false);
 		this.userID = userID;
 
@@ -160,72 +163,7 @@ public class ViewStatisticsWindow extends JFrame {
 		panel.setBounds(172, 0, 1, 254);
 		contentPane.add(panel);
 
-		showStatistics(userID);
+		StatisticsService.showStatistics(userID, Food_Label, Transport_Label, Entertainment_Label, Utilities_Label, Other_Label, Total_Expenses_Label);
 
-	}
-
-	public void showStatistics(int userID) throws ClassNotFoundException, SQLException {
-		Database db = new Database();
-		Connection conn = db.getConn();
-
-		String sql = "SELECT * FROM Transactions WHERE user_id = " + userID;
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		ResultSet rs = stmt.executeQuery();
-
-		double totalExpenses = 0;
-		double food = 0, transport = 0, entertainment = 0, utilities = 0, other = 0;
-
-		while (rs.next()) {
-			String type = "";
-			double amount = rs.getDouble("amount");
-			int categoryId = rs.getInt("category_id");
-
-			int i = 0;
-
-			String categorySQL = "SELECT * FROM Categories";
-			PreparedStatement categorySTMT = conn.prepareStatement(categorySQL);
-			ResultSet categoryRS = categorySTMT.executeQuery();
-
-			while (categoryRS.next() && i != categoryId) {
-				type = categoryRS.getString("type");
-				i++;
-			}
-
-			if (type.equalsIgnoreCase("income")) {
-			} else {
-				totalExpenses += amount;
-
-				if (categoryId == 2)
-					food += amount;
-				else if (categoryId == 3)
-					transport += amount;
-				else if (categoryId == 4)
-					entertainment += amount;
-				else if (categoryId == 5)
-					utilities += amount;
-				else
-					other += amount;
-			}
-		}
-
-		rs.close();
-		stmt.close();
-		conn.close();
-
-		double food_percent, transport_percent, entertainment_percent, utilities_percent, other_percent;
-
-		food_percent = Math.round((food / totalExpenses) * 100);
-		transport_percent = Math.round((transport / totalExpenses) * 100);
-		entertainment_percent = Math.round((entertainment / totalExpenses) * 100);
-		utilities_percent = Math.round((utilities / totalExpenses) * 100);
-		other_percent = Math.round((other / totalExpenses) * 100);
-
-		Food_Label.setText("€ " + food + " (" + food_percent + "%)");
-		Transport_Label.setText("€ " + transport + " (" + transport_percent + "%)");
-		Entertainment_Label.setText("€ " + entertainment + " (" + entertainment_percent + "%)");
-		Utilities_Label.setText("€ " + utilities + " (" + utilities_percent + "%)");
-		Other_Label.setText("€ " + other + " (" + other_percent + "%)");
-
-		Total_Expenses_Label.setText("€ " + totalExpenses);
 	}
 }

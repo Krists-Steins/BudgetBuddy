@@ -5,6 +5,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+
+import me.techii.services.TransactionsService;
 import me.techii.services.base.Database;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -366,118 +368,11 @@ public class MainWindow extends JFrame {
 		panel_1.add(btnLogout);
 
 		refreshData();
-	}
-
-	public void refreshData() {
-		try {
-			showTransactions();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+	
+	public void refreshData() throws ClassNotFoundException, SQLException {
+		TransactionsService.showTransactions(userId, transactionsContainer, kategorijuMasivs, Income_Label, Food_label, Transport_label, Entertainment_label, Utilities_label, Other_label, Total_Income_Label, Total_Expenses_Label, Balance_Label, Budget_Spent_Label, Budget_Percent_Label, BudgetMeterGreenThingy);
 	}
 
-	public void showTransactions() throws SQLException, ClassNotFoundException {
-		transactionsContainer.removeAll();
-
-		Database db = new Database();
-		Connection conn = db.getConn();
-
-		String sql = "SELECT * FROM Transactions WHERE user_id = " + userId;
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		ResultSet rs = stmt.executeQuery();
-
-		double totalIncome = 0;
-		double totalExpenses = 0;
-		double food = 0, transport = 0, entertainment = 0, utilities = 0, other = 0;
-
-		while (rs.next()) {
-			String date = rs.getDate("date").toString();
-			String desc = rs.getString("description");
-			String type = "";
-			double amount = rs.getDouble("amount");
-			int categoryId = rs.getInt("category_id");
-
-			int i = 0;
-
-			String categorySQL = "SELECT * FROM Categories";
-			PreparedStatement categorySTMT = conn.prepareStatement(categorySQL);
-			ResultSet categoryRS = categorySTMT.executeQuery();
-
-			while (categoryRS.next() && i != categoryId) {
-				type = categoryRS.getString("type");
-				i++;
-			}
-
-			String categoryName = "Income";
-			if (categoryId >= 1 && categoryId < kategorijuMasivs.length) {
-				categoryName = kategorijuMasivs[categoryId];
-			}
-
-			if (type.equalsIgnoreCase("income")) {
-				totalIncome += amount;
-			} else {
-				totalExpenses += amount;
-
-				if (categoryId == 2)
-					food += amount;
-				else if (categoryId == 3)
-					transport += amount;
-				else if (categoryId == 4)
-					entertainment += amount;
-				else if (categoryId == 5)
-					utilities += amount;
-				else
-					other += amount;
-			}
-
-			JPanel row = new JPanel();
-			row.setLayout(new GridLayout(1, 5));
-			row.setPreferredSize(new Dimension(500, 25));
-			row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-
-			row.add(new JLabel(date));
-			row.add(new JLabel(desc));
-			row.add(new JLabel(categoryName));
-			row.add(new JLabel(type));
-			row.add(new JLabel("€ " + amount));
-
-			transactionsContainer.add(row);
-		}
-
-		double newBalance = totalIncome - totalExpenses;
-
-		Income_Label.setText("€ " + totalIncome);
-		Food_label.setText("€ " + food);
-		Transport_label.setText("€ " + transport);
-		Entertainment_label.setText("€ " + entertainment);
-		Utilities_label.setText("€ " + utilities);
-		Other_label.setText("€ " + other);
-
-		Total_Income_Label.setText("€ " + totalIncome);
-		Total_Expenses_Label.setText("€ " + totalExpenses);
-		Balance_Label.setText("€ " + newBalance);
-
-		String balSQL = "UPDATE Users SET balance = ? WHERE user_id = " + userId;
-		PreparedStatement balSTMT = conn.prepareStatement(balSQL);
-		balSTMT.setDouble(1, newBalance);
-		balSTMT.executeUpdate();
-
-		rs.close();
-		stmt.close();
-		conn.close();
-
-		double budgetLimit = 500.0;
-		Budget_Spent_Label.setText("€ " + totalExpenses);
-
-		int percent = (int) ((totalExpenses / budgetLimit) * 100);
-		if (percent > 100)
-			percent = 100;
-
-		Budget_Percent_Label.setText(percent + "%");
-		int greenWidth = (int) ((percent / 100.0) * 172);
-		BudgetMeterGreenThingy.setBounds(0, 0, greenWidth, 30);
-
-		transactionsContainer.revalidate();
-		transactionsContainer.repaint();
-	}
+	
 }

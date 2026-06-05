@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import me.techii.services.TransactionsService;
 import me.techii.services.base.Database;
 import javax.swing.JTextField;
 import java.awt.Font;
@@ -89,58 +91,8 @@ public class AddTransactionWindow extends JFrame {
 		JButton btnNewButton = new JButton("Save");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					int errorCount = 0;
-					String validCharacters = "1234567890.";
-					
-					double amount = Double.parseDouble(amountField.getText());
-					String amountText = String.valueOf(amount);
-					
-					String desc = descriptionField.getText();
-
-					int categoryId = comboBox_1.getSelectedIndex() + 1;
-					int userId = mainWindow.userId;
-					
-					for (int i = 0; i < amountText.length(); i++) {
-						for (int j = 0; j < validCharacters.length(); j++) {
-							if (amountText.charAt(i) != validCharacters.charAt(j)) {
-								errorCount++;
-							} else {
-								errorCount = 0;
-								j = validCharacters.length() + 1;
-								
-							}
-						}
-						if (errorCount > 1) {
-							return;
-						}
-					}
-					
-					if (errorCount == 0) {
-						Database db = new Database();
-						Connection conn = db.getConn();
-	
-						String sql = "INSERT INTO Transactions (amount, date, description, user_id, category_id) VALUES (?, ?, ?, ?, ?)";
-						PreparedStatement stmt = conn.prepareStatement(sql);
-						stmt.setDouble(1, amount);
-						stmt.setDate(2, java.sql.Date.valueOf(LocalDate.now()));
-						stmt.setString(3, desc);
-						stmt.setInt(4, userId);
-						stmt.setInt(5, categoryId);
-	
-						stmt.executeUpdate();
-	
-						stmt.close();
-						conn.close();
-	
-						mainWindow.refreshData();
-						dispose();
-					}
-				} catch (NumberFormatException ex) {
-					ex.printStackTrace();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				TransactionsService.addTransaction(amountField, descriptionField, comboBox_1, mainWindow);
+				dispose();
 			}
 		});
 		btnNewButton.setBackground(Color.GREEN);
